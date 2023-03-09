@@ -8,13 +8,15 @@ import platform
 import phonenumbers
 import webbrowser
 import threading
+import urllib.request
 import requests
+import instabot
 #from imports
 from scapy.all import ARP, Ether, srp
 from datetime import date
 from colorama import Fore
 from phonenumbers import geocoder, carrier, timezone
-from ip2geotools.databases.noncommercial import DbIpCity
+from instabot import Bot
 
 #pre variable setting
 help = """
@@ -24,6 +26,11 @@ websitecheck: checks response to a url
 exit: exits
 networkscan: scans network for devices
 clear: clears the screen
+ping: pings IP address
+iptrack: geolocates IP address
+drillbit: does OSINT on person based on their name and city
+proxyscrape: provides list or usable proxies
+wordlistcheck: checks to see if string is in wordlist
 """
 light_blue = Fore.LIGHTCYAN_EX
 blue = Fore.LIGHTBLUE_EX
@@ -62,6 +69,77 @@ phonechecktitle = """
 """
 
 #functions---------------------------------------------------
+
+#checks to see if string is in wordlist
+def wordlistcheck():
+    users_password = input("Please enter password to check: ")
+    wordlist = input("Enter path to wordlist: ")
+    if os.path.exists(wordlist) == False:
+        clear()
+        print("Wordlist not found")
+        time.sleep(3)
+        wordlistcheck()
+    f = open(wordlist, "r", encoding="ISO-8859-1")
+    wordlist = f.read().splitlines()
+    f.close()
+    print("Checking...")
+    for password in wordlist:
+        if password == users_password:
+            print("Password in wordlist")
+            input("Press enter to continue")
+            start()
+    print("Password not in wordlist")
+    input("Press enter to continue")
+    start()
+
+#proxy scraping
+def proxy_scrape():
+    print("Scraping https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/socks5.txt")
+    time.sleep(2)
+    website = "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/socks5.txt"
+    response = requests.get(website)
+    data = response.text
+    print(data)
+    start()
+
+#name to location
+def drillbit():
+    first_name = input("First name: ")
+    last_name = input("last name: ")
+    state = input("State abbreviated: ")
+    city = input("City: ")
+    city = city.replace(' ','-')
+    webbrowser.open("https://www.beenverified.com/people/"+first_name+"-"+last_name+"/"+state+"/"+city)
+    start()
+
+#ip geolocator
+def get_location():
+    ip_address = input("Victim IP address: ")
+    response = requests.get(f'https://ipapi.co/{ip_address}/json/').json()
+    location_data = {
+        "ip": ip_address,
+        "city": response.get("city"),
+        "region": response.get("region"),
+        "country": response.get("country_name")
+    }
+    print(location_data)
+    start()
+
+#pings ip address, fully cross platform
+def ping(host):
+    """
+    Returns True if host responds to a ping request
+    """
+    import subprocess, platform
+
+    # Ping parameters as function of OS
+    ping_str = "-n 1" if  platform.system().lower()=="windows" else "-c 1"
+    args = "ping " + " " + ping_str + " " + host
+    need_sh = False if  platform.system().lower()=="windows" else True
+
+    # Ping
+    return subprocess.call(args, shell=need_sh) == 0
+    
 def clear():
     if os.name == "posix":
         _ = os.system('clear')
@@ -230,6 +308,20 @@ def start():
         start()
     if user_in == "library":
         library()
+    if user_in == "ping":
+        ip = input("IP address: ")
+        print(ping(ip))
+        start()
+    if user_in == "iptrack":
+        get_location()
+    if user_in == "drillbit":
+        drillbit()
+    if user_in == "proxyscrape":
+        proxy_scrape()
+    if user_in == "wordlistcheck":
+        wordlistcheck()
+
+
 
 if __name__=="__main__":
     start()
