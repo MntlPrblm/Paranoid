@@ -11,13 +11,13 @@ import threading
 import urllib.request
 import requests
 import re
-import instabot
 #from imports
+from hashlib import md5
+from urllib.request import urlopen, hashlib
 from scapy.all import ARP, Ether, srp
 from datetime import date
 from colorama import Fore
 from phonenumbers import geocoder, carrier, timezone
-from instabot import Bot
 
 #pre variable setting
 help = """
@@ -33,6 +33,8 @@ drillbit: does OSINT on person based on their name and city
 proxyscrape: provides list or usable proxies
 wordlistcheck: checks to see if string is in wordlist
 portscan: scans IP address for ports
+default: prints default gateway
+hashcracker: a hashcracker for low hanging fruit
 """
 light_blue = Fore.LIGHTCYAN_EX
 blue = Fore.LIGHTBLUE_EX
@@ -41,12 +43,22 @@ white = Fore.LIGHTWHITE_EX
 green = Fore.LIGHTGREEN_EX
 red = Fore.LIGHTRED_EX
 
+hashcracker_title = """
+    __  __           __    ______                __            
+   / / / /___ ______/ /_  / ____/________ ______/ /_____  _____
+  / /_/ / __ `/ ___/ __ \/ /   / ___/ __ `/ ___/ //_/ _ \/ ___/
+ / __  / /_/ (__  ) / / / /___/ /  / /_/ / /__/ ,< /  __/ /    
+/_/ /_/\__,_/____/_/ /_/\____/_/   \__,_/\___/_/|_|\___/_/     
+No password is safe...   
+"""
+
 networktitle = """
  _      _     ____  ____    ____  _        _     ___  _   _      _____ _____  _      ____  ____  _  __
 / \  /|/ \ /|/  _ \/ ___\  /  _ \/ \  /|  / \__/|\  \//  / \  /|/  __//__ __\/ \  /|/  _ \/  __\/ |/ /
 | |  ||| |_||| / \||    \  | / \|| |\ ||  | |\/|| \  /   | |\ |||  \    / \  | |  ||| / \||  \/||   / 
 | |/\||| | ||| \_/|\___ |  | \_/|| | \||  | |  || / /    | | \|||  /_   | |  | |/\||| \_/||    /|   \ 
 \_/  \|\_/ \|\____/\____/  \____/\_/  \|  \_/  \|/_/     \_/  \|\____\  \_/  \_/  \|\____/\_/\_\\_|\_\
+We will find everyone!
 """
 
 titlescreen = """
@@ -72,29 +84,303 @@ phonechecktitle = """
 
 #functions---------------------------------------------------
 
+#HASH CRACKING===============================================
+
+def hashcracker():
+    print(magenta+hashcracker_title)
+    hash_input = input(white+"Please input hash\n>")
+    hash_input = hash_input.lower()
+    hash_type = input("Please enter hash type\n>")
+    hash_type = hash_type.lower()
+    if hash_type == "md5":
+        md5crack(hash_input)
+    if hash_type == "sha1":
+        sha1crack(hash_input)
+    if hash_type == "sha224":
+        sha224crack(hash_input)
+    if hash_type == "sha256":
+        sha256crack(hash_input)
+    if hash_type == "sha384":
+        sha384crack(hash_input)
+    if hash_type == "sha512":
+        sha512crack(hash_input)
+    if hash_type == "blake2b":
+        blake2bcrack(hash_input)
+    if hash_type == "blake2s":
+        blake2scrack(hash_input)
+    if hash_type == "sha3_224":
+        sha3_224crack(hash_input)
+    if hash_type == "sha3_256":
+        sha3_256crack(hash_input)
+    if hash_type == "sha3_384":
+        sha3_384crack(hash_input)
+    if hash_type == "sha3_512":
+        sha3_512crack(hash_input)
+    if hash_type == "shake_128":
+        shake_128crack(hash_input)
+    if hash_type == "shake_256":
+        shake_256crack(hash_input)
+    else:
+        screen_clear()
+        print("Please only enter hashes that are: sha1, sha224, sha256, sha384, sha512, blake2b, blake2s, md5, sha3_224, sha3_256, sha3_384, sha3_512, shake_128, or shake_256")
+        time.sleep(3)
+        hashcracker()
+
+
+#url containing wordlist
+url_wordlist = 'https://raw.githubusercontent.com/danielmiessler/SecLists/master/Passwords/Common-Credentials/10-million-password-list-top-10000.txt'
+
+def screen_clear():
+   # for mac and linux(here, os.name is 'posix')
+   if os.name == 'posix':
+      _ = os.system('clear')
+   else:
+      # for windows platfrom
+      _ = os.system('cls')
+
+def md5crack(hash):
+    LIST_OF_COMMON_PASSWORDS = str(urlopen(url_wordlist).read(), 'utf-8')
+    for guess in LIST_OF_COMMON_PASSWORDS.split('\n'):
+        hashedGuess = hashlib.md5(bytes(guess, 'utf-8')).hexdigest()
+        if hashedGuess == hash:
+            screen_clear()
+            print("The password is:", str(guess))
+            start()
+        elif hashedGuess != hash:
+           print("Password guess ",str(guess)," does not match, trying next...")
+    screen_clear()
+    print("Password not in database, we'll get them next time.")
+    start()
+
+#sha224 crack
+def sha224crack(hash):
+    LIST_OF_COMMON_PASSWORDS = str(urlopen(url_wordlist).read(), 'utf-8')
+    for guess in LIST_OF_COMMON_PASSWORDS.split('\n'):
+        hashedGuess = hashlib.sha224(bytes(guess, 'utf-8')).hexdigest()
+        if hashedGuess == hash:
+            screen_clear()
+            print("The password is:", str(guess))
+            start()
+        elif hashedGuess != hash:
+           print("Password guess ",str(guess)," does not match, trying next...")
+    screen_clear()
+    print("Password not in database, we'll get them next time.")
+    start()
+
+#sha1 crack
+def sha1crack(hash):
+    LIST_OF_COMMON_PASSWORDS = str(urlopen(url_wordlist).read(), 'utf-8')
+    for guess in LIST_OF_COMMON_PASSWORDS.split('\n'):
+        hashedGuess = hashlib.sha1(bytes(guess, 'utf-8')).hexdigest()
+        if hashedGuess == hash:
+            screen_clear()
+            print("The password is:", str(guess))
+            start()
+        elif hashedGuess != hash:
+            print("Password guess ",str(guess)," does not match, trying next...")
+    screen_clear()
+    print("Password not in database, we'll get them next time.")
+    start()
+
+#sha256 crack
+def sha256crack(hash):
+    LIST_OF_COMMON_PASSWORDS = str(urlopen(url_wordlist).read(), 'utf-8')
+    for guess in LIST_OF_COMMON_PASSWORDS.split('\n'):
+        hashedGuess = hashlib.sha256(bytes(guess, 'utf-8')).hexdigest()
+        if hashedGuess == hash:
+            screen_clear()
+            print("The password is:", str(guess))
+            start()
+        elif hashedGuess != hash:
+            print("Password guess ",str(guess)," does not match, trying next...")
+    screen_clear()
+    print("Password not in database, we'll get them next time.")
+    start()
+
+#sha384 crack
+def sha384crack(hash):
+    LIST_OF_COMMON_PASSWORDS = str(urlopen(url_wordlist).read(), 'utf-8')
+    for guess in LIST_OF_COMMON_PASSWORDS.split('\n'):
+        hashedGuess = hashlib.sha384(bytes(guess, 'utf-8')).hexdigest()
+        if hashedGuess == hash:
+            screen_clear()
+            print("The password is:", str(guess))
+            start()
+        elif hashedGuess != hash:
+            print("Password guess ",str(guess)," does not match, trying next...")
+    screen_clear()
+    print("Password not in database, we'll get them next time.")
+    start()
+
+#sha512 crack
+def sha512crack(hash):
+    LIST_OF_COMMON_PASSWORDS = str(urlopen(url_wordlist).read(), 'utf-8')
+    for guess in LIST_OF_COMMON_PASSWORDS.split('\n'):
+        hashedGuess = hashlib.sha512(bytes(guess, 'utf-8')).hexdigest()
+        if hashedGuess == hash:
+            screen_clear()
+            print("The password is:", str(guess))
+            start()
+        elif hashedGuess != hash:
+            print("Password guess ",str(guess)," does not match, trying next...")
+    screen_clear()
+    print("Password not in database, we'll get them next time.")
+    start()
+
+#blake2b crack
+def blake2bcrack(hash):
+    LIST_OF_COMMON_PASSWORDS = str(urlopen(url_wordlist).read(), 'utf-8')
+    for guess in LIST_OF_COMMON_PASSWORDS.split('\n'):
+        hashedGuess = hashlib.blake2b(bytes(guess, 'utf-8')).hexdigest()
+        if hashedGuess == hash:
+            screen_clear()
+            print("The password is:", str(guess))
+            start()
+        elif hashedGuess != hash:
+            print("Password guess ",str(guess)," does not match, trying next...")
+    screen_clear()
+    print("Password not in database, we'll get them next time.")
+    start()
+
+#blake2s crack
+def blake2scrack(hash):
+    LIST_OF_COMMON_PASSWORDS = str(urlopen(url_wordlist).read(), 'utf-8')
+    for guess in LIST_OF_COMMON_PASSWORDS.split('\n'):
+        hashedGuess = hashlib.blake2s(bytes(guess, 'utf-8')).hexdigest()
+        if hashedGuess == hash:
+            screen_clear()
+            print("The password is:", str(guess))
+            start()
+        elif hashedGuess != hash:
+            print("Password guess ",str(guess)," does not match, trying next...")
+    screen_clear()
+    print("Password not in database, we'll get them next time.")
+    start()
+
+#sha3_224 crack
+def sha3_224crack(hash):
+    LIST_OF_COMMON_PASSWORDS = str(urlopen(url_wordlist).read(), 'utf-8')
+    for guess in LIST_OF_COMMON_PASSWORDS.split('\n'):
+        hashedGuess = hashlib.sha3_224(bytes(guess, 'utf-8')).hexdigest()
+        if hashedGuess == hash:
+            screen_clear()
+            print("The password is:", str(guess))
+            start()
+        elif hashedGuess != hash:
+            print("Password guess ",str(guess)," does not match, trying next...")
+    screen_clear()
+    print("Password not in database, we'll get them next time.")
+    start()
+
+#sha3_256 crack
+def sha3_256crack(hash):
+    LIST_OF_COMMON_PASSWORDS = str(urlopen(url_wordlist).read(), 'utf-8')
+    for guess in LIST_OF_COMMON_PASSWORDS.split('\n'):
+        hashedGuess = hashlib.sha3_256(bytes(guess, 'utf-8')).hexdigest()
+        if hashedGuess == hash:
+            screen_clear()
+            print("The password is:", str(guess))
+            start()
+        elif hashedGuess != hash:
+            print("Password guess ",str(guess)," does not match, trying next...")
+    screen_clear()
+    print("Password not in database, we'll get them next time.")
+    start()
+
+#sha3_384 crack
+def sha3_384crack(hash):
+    LIST_OF_COMMON_PASSWORDS = str(urlopen(url_wordlist).read(), 'utf-8')
+    for guess in LIST_OF_COMMON_PASSWORDS.split('\n'):
+        hashedGuess = hashlib.sha3_384(bytes(guess, 'utf-8')).hexdigest()
+        if hashedGuess == hash:
+            screen_clear()
+            print("The password is:", str(guess))
+            start()
+        elif hashedGuess != hash:
+            print("Password guess ",str(guess)," does not match, trying next...")
+    screen_clear()
+    print("Password not in database, we'll get them next time.")
+    start()
+
+#sha3_512 crack
+def sha3_512crack(hash):
+    LIST_OF_COMMON_PASSWORDS = str(urlopen(url_wordlist).read(), 'utf-8')
+    for guess in LIST_OF_COMMON_PASSWORDS.split('\n'):
+        hashedGuess = hashlib.sha3_512(bytes(guess, 'utf-8')).hexdigest()
+        if hashedGuess == hash:
+            screen_clear()
+            print("The password is:", str(guess))
+            start()
+        elif hashedGuess != hash:
+            print("Password guess ",str(guess)," does not match, trying next...")
+    screen_clear()
+    print("Password not in database, we'll get them next time.")
+    start()
+
+#shake_128 crack
+def shake_128crack(hash):
+    LIST_OF_COMMON_PASSWORDS = str(urlopen(url_wordlist).read(), 'utf-8')
+    for guess in LIST_OF_COMMON_PASSWORDS.split('\n'):
+        hashedGuess = hashlib.shake_128(bytes(guess, 'utf-8')).hexdigest()
+        if hashedGuess == hash:
+            screen_clear()
+            print("The password is:", str(guess))
+            start()
+        elif hashedGuess != hash:
+            print("Password guess ",str(guess)," does not match, trying next...")
+    screen_clear()
+    print("Password not in database, we'll get them next time.")
+    start()
+
+#shake_256 crack
+def shake_256crack(hash):
+    LIST_OF_COMMON_PASSWORDS = str(urlopen(url_wordlist).read(), 'utf-8')
+    for guess in LIST_OF_COMMON_PASSWORDS.split('\n'):
+        hashedGuess = hashlib.shake_256(bytes(guess, 'utf-8')).hexdigest()
+        if hashedGuess == hash:
+            screen_clear()
+            print("The password is:", str(guess))
+            start()
+        elif hashedGuess != hash:
+            print("Password guess ",str(guess)," does not match, trying next...")
+    screen_clear()
+    print("Password not in database, we'll get them next time.")
+    start()
+
+#=============================================================
+
+#default gateway finder
+def default_gateway():
+    gateways = netifaces.gateways()
+    default_gateway = gateways['default'][netifaces.AF_INET][0]
+    print(default_gateway)
+    start()
+
+#port scanner made by david bombal
 def portscan():
-    print("All credits to David Bombal! Hell of a hacker!")
-    print("https://github.com/davidbombal/red-python-scripts/blob/main/port_scanner_regex.py")
+    print("==============================================")
+    print(light_blue+"All credits to David Bombal! Hell of a hacker!")
+    print(green+"https://github.com/davidbombal/red-python-scripts/blob/main/port_scanner_regex.py")
+    print(white+"==============================================")
     ip_add_pattern = re.compile("^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$")
     port_range_pattern = re.compile("([0-9]+)-([0-9]+)")
     port_min = 0
     port_max = 65535
     open_ports = []
-
     while True:
-        ip_add_entered = input("\nTarget IP address: ")
+        ip_add_entered = input(white+"\nTarget IP address: ")
         if ip_add_pattern.search(ip_add_entered):
             print(f"{ip_add_entered} IP address Valid")
             break
     while True:
         print("Please enter port range, ex: 22-80")
         port_range = input("Enter port range: ")
+        print("Scanning...")
         port_range_valid = port_range_pattern.search(port_range.replace(" ",""))
         if port_range_valid:
             port_min = int(port_range_valid.group(1))
             port_max = int(port_range_valid.group(2))
             break
-    # Basic socket port scanning
     for port in range(port_min, port_max + 1):
         try:
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -104,8 +390,7 @@ def portscan():
         except:
             pass
     for port in open_ports:
-        print(f"Port {port} is open on {ip_add_entered}.")
-    input("Press enter to continue")
+        print(green+f"Port {port} is open on {ip_add_entered}.")
     start()
 
 #checks to see if string is in wordlist
@@ -127,7 +412,6 @@ def wordlistcheck():
             input("Press enter to continue")
             start()
     print("Password not in wordlist")
-    input("Press enter to continue")
     start()
 
 
@@ -361,6 +645,15 @@ def start():
         wordlistcheck()
     if user_in == "portscan":
         portscan()
+    if user_in == "default":
+        default_gateway()
+    if user_in == "hashcracker":
+        hashcracker()
+    
+
+    print("Invalid command")
+    time.sleep(2)
+    start()
 
 
 
