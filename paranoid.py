@@ -11,12 +11,15 @@ import threading
 import urllib.request
 import requests
 import re
+import json
 #from imports
 from hashlib import md5
 from urllib.request import urlopen, hashlib
 from scapy.all import ARP, Ether, srp
 from datetime import date
 from colorama import Fore
+from time import sleep
+from datetime import datetime
 from phonenumbers import geocoder, carrier, timezone
 
 #pre variable setting
@@ -33,6 +36,7 @@ drillbit: does OSINT on person based on their name and city
 proxyscrape: provides list or usable proxies
 wordlistcheck: checks to see if string is in wordlist
 portscan: scans IP address for ports
+library: Opens library to take notes
 default: prints default gateway
 hashcracker: a hashcracker for low hanging fruit
 """
@@ -85,7 +89,6 @@ phonechecktitle = """
 #functions---------------------------------------------------
 
 #HASH CRACKING===============================================
-
 def hashcracker():
     print(magenta+hashcracker_title)
     hash_input = input(white+"Please input hash\n>")
@@ -649,6 +652,8 @@ def start():
         default_gateway()
     if user_in == "hashcracker":
         hashcracker()
+    if user_in == "instadata":
+        instadata()
     
 
     print("Invalid command")
